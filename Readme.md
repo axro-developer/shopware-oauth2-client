@@ -8,7 +8,7 @@ Controls the authentication and renewal of the token independently.
 
 Install package:
 
-```composer require axro-developer/shopware-oauth2-client```
+```composer require axro/shopware-oauth2-client```
 
 ## Usage ##
 
