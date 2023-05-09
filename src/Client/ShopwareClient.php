@@ -9,7 +9,6 @@
 namespace AxroShopware\Client;
 
 use GuzzleHttp\Exception\RequestException;
-use RuntimeException;
 use DateTime;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -35,8 +34,7 @@ class ShopwareClient
         private string $baseUrl,
         private string $clientId,
         private string $clientSecret,
-    )
-    {
+    ) {
         $this->promises = [];
         $this->indexingBehavior = self::INDEXING_QUEUE;
     }
@@ -49,6 +47,7 @@ class ShopwareClient
 
     /**
      * @throws GuzzleException
+     * @throws AccessTokenException
      */
     public function request(string $method, string $uri, array $body = [], $returnObject = false): mixed
     {
@@ -61,7 +60,7 @@ class ShopwareClient
                 'PUT' => $this->put($uri, $body),
                 'DELETE' => $this->delete($uri),
             };
-        } catch (RequestException $e) {
+        } catch (RequestException|AccessTokenException $e) {
             $this->logger?->error(
                 $e->getMessage(),
                 [
@@ -86,6 +85,9 @@ class ShopwareClient
         return $this->handleResponse($responseBody, $returnObject);
     }
 
+    /**
+     * @throws AccessTokenException
+     */
     public function requestAsync(string $method, string $uri, array $body = []): ShopwareClient
     {
         $this->getAccessToken();
@@ -147,7 +149,7 @@ class ShopwareClient
     }
 
     /**
-     * @throws AccessTokenException
+     * @throws AccessTokenException|GuzzleException
      */
     private function getToken(): void
     {
@@ -187,11 +189,10 @@ class ShopwareClient
         ]);
 
         $data = $this->handleResponse($response->getBody()->getContents(), false);
-        $this->setTokenData($data);
-
-        if (empty($data['access_token'])) {
+        if (!($data['access_token'] ?? false)) {
             throw new AccessTokenException('Access token is missing');
         }
+        $this->setTokenData($data);
     }
 
     /**
@@ -290,6 +291,9 @@ class ShopwareClient
         return [];
     }
 
+    /**
+     * @throws AccessTokenException
+     */
     private function getAccessToken($retry = 0): void
     {
         try {
@@ -301,8 +305,7 @@ class ShopwareClient
         } catch (AccessTokenException|GuzzleException) {
             if ($retry > 3) {
                 $this->logger?->error('Missing access token');
-
-                throw new RuntimeException('Missing access token');
+                throw new AccessTokenException('Access token is missing');
             }
             sleep(1);
             $retry++;
