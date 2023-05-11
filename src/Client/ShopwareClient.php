@@ -190,7 +190,7 @@ class ShopwareClient
 
         $data = $this->handleResponse($response->getBody()->getContents(), false);
         if (!($data['access_token'] ?? false)) {
-            throw new AccessTokenException('Access token is missing');
+            throw new AccessTokenException('Access token is missing', $data);
         }
         $this->setTokenData($data);
     }

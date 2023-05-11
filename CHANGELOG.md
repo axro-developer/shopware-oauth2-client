@@ -1,5 +1,12 @@
 <!-- CHANGELOGGER -->
 
+## [2.0.4] - 2023-05-11
+
+### Bug fix (1 change)
+
+- Fix AccessTokenException
+
+
 ## [2.0.3] - 2023-05-10
 
 ### Bug fix (1 change)
