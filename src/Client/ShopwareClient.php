@@ -283,7 +283,6 @@ class ShopwareClient
             $this->logger?->error(
                 'Invalid json in ShopwareClient: ' . $e->getMessage(),
                 [
-                    'statusCode' => $response->getStatusCode(),
                     'body' => $responseBody,
                 ]
             );
