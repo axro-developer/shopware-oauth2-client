@@ -1,5 +1,11 @@
 <!-- CHANGELOGGER -->
 
+## [2.0.5] - 2023-06-19
+
+### Bug fix (1 change)
+
+- Removed getStatusCode, it does not exists on json exception
+
 ## [2.0.4] - 2023-05-11
 
 ### Bug fix (1 change)
