@@ -1,0 +1,17 @@
+grumphp:
+    tasks:
+        phpcs:
+            standard: PSR12
+            ignore_patterns: ['*/vendor/*']
+            warning_severity: 0
+            error_severity: 1
+            report: full
+        phpversion:
+            project: '8.0'
+        securitychecker_enlightn:
+            run_always: true
+        phpstan:
+            level: 5
+
+
+

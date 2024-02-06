@@ -2,12 +2,11 @@
 
 /**
  * Project: shopware-oauth2-client
- * Author: Emre Eromay <eeromay@axro.de>
- * Copyright (c) AXRO GmbH
  */
 
 namespace AxroShopware\Client;
 
+use Exception;
 use GuzzleHttp\Exception\RequestException;
 use DateTime;
 use GuzzleHttp\Client;
@@ -48,6 +47,7 @@ class ShopwareClient
     /**
      * @throws GuzzleException
      * @throws AccessTokenException
+     * @throws Exception
      */
     public function request(string $method, string $uri, array $body = [], $returnObject = false): mixed
     {
@@ -59,8 +59,9 @@ class ShopwareClient
                 'PATCH' => $this->patch($uri, $body),
                 'PUT' => $this->put($uri, $body),
                 'DELETE' => $this->delete($uri),
+                default => throw new Exception('Unsupported')
             };
-        } catch (RequestException|AccessTokenException $e) {
+        } catch (RequestException | AccessTokenException $e) {
             $this->logger?->error(
                 $e->getMessage(),
                 [
@@ -87,6 +88,7 @@ class ShopwareClient
 
     /**
      * @throws AccessTokenException
+     * @throws Exception
      */
     public function requestAsync(string $method, string $uri, array $body = []): ShopwareClient
     {
@@ -97,6 +99,7 @@ class ShopwareClient
             'PATCH' => $this->patchAsync($uri, $body),
             'PUT' => $this->putAsync($uri, $body),
             'DELETE' => $this->deleteAsync($uri),
+            default => throw new Exception('Unsupported')
         };
 
         $this->promises[] = $response;
@@ -109,7 +112,7 @@ class ShopwareClient
     public function promise($returnObject = false): mixed
     {
         $results = Utils::all($this->promises)->wait();
-        unset($responses);
+        unset($responses); // @phpstan-ignore-line
         $responses = [];
 
         foreach ($results as $result) {
@@ -301,7 +304,7 @@ class ShopwareClient
             } else {
                 $this->isTokenExpired()?->getToken();
             }
-        } catch (AccessTokenException|GuzzleException) {
+        } catch (AccessTokenException | GuzzleException) {
             if ($retry > 3) {
                 $this->logger?->error('Missing access token');
                 throw new AccessTokenException('Access token is missing');
